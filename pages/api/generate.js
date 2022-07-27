@@ -16,7 +16,13 @@ export default async function (req, res) {
     stream: false,
     max_tokens: 1000
   });
-output = completion.data.choices[0].text;
+  if (req.body.recipe == ""){
+    
+  output = completion.data.choices[0].text;
+  }
+  else{
+  output = req.body.recipe +completion.data.choices[0].text;
+}
   res.status(200).json({ result: output });
   //console.log(result);
   

@@ -64,4 +64,21 @@
   font-weight: bold;
   margin-top: 40px;
   width: 80%;
+  display: inline-block;
+  word-break: break-all;
+  white-space: pre-wrap;
+  
 }
+.main h1 {
+font-size-adjust: 20%;
+}
+
+.main block {
+background-color: beige;
+border-radius: 2px;
+border: #202123;
+text-align: left;
+
+
+}
+

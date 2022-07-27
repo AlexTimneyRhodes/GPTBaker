@@ -2,6 +2,9 @@ import Head from "next/head";
 import { useState } from "react";
 import styles from "./index.module.css";
 
+
+
+
 export default function Home() {
   const [Input, setInput] = useState("");
   const [result, setResult] = useState();
@@ -19,6 +22,14 @@ export default function Home() {
     setResult(data.result);
     setInput("");
   }
+  async function AboutFn() {
+    var x = document.getElementById("AboutDiv");
+    if (x.style.display === "none") {
+      x.style.display = "block";
+    } else {
+      x.style.display = "none";
+    }
+  }
 
   return (
     <div>
@@ -29,18 +40,27 @@ export default function Home() {
 
       <main className={styles.main}>
         <img src="/icon.png" className={styles.icon} />
-        <h3>What am I eating tonight?</h3>
+        <h3>Create a Recipe!</h3>
+        
+<div class="block"> 
+What is this? \n
+This website allows you to use the GPT-3 Language model to create recipes. \n
+search your mind! any recipe is possible!\n
+<h1>Cook at your own risk</h1>
+</div>
+
+
         <form onSubmit={onSubmit}>
           <input
             type="text"
-            name="recipe"
+            name="Recipe"
             placeholder="Enter a meal name (Leave blank for something random)"
             value={Input}
             onChange={(e) => setInput(e.target.value)}
           />
           <input type="submit" value="recipe" />
         </form>
-        <pre><div className={styles.result}>{result}</div></pre>
+        <div className={styles.result}>{result}</div>
         
       </main>
     </div>
