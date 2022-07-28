@@ -12,9 +12,9 @@ export default async function (req, res) {
   const completion = await openai.createCompletion({
     model: "text-davinci-002",
     prompt: generateRecipe(req.body.recipe),
-    temperature: 0.6,
+    temperature: 0.7,
     stream: false,
-    max_tokens: 1000
+    max_tokens: 256
   });
   if (req.body.recipe == ""){
     

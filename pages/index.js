@@ -11,6 +11,7 @@ export default function Home() {
 
   async function onSubmit(event) {
     event.preventDefault();
+    setResult(<img src = "/loading.gif"/>);
     const response = await fetch("/api/generate", {
       method: "POST",
       headers: {
@@ -43,14 +44,12 @@ export default function Home() {
         <h3>Create a Recipe!</h3>
         
 <div class="block"> 
-What is this? \n
-This website allows you to use the GPT-3 Language model to create recipes. \n
-search your mind! any recipe is possible!\n
-<h1>Cook at your own risk</h1>
+What is this? This website allows you to use the GPT-3 Language model to create recipes. search your mind! any recipe is possible!
+<h1>Make at your own risk</h1>
 </div>
 
 
-        <form onSubmit={onSubmit}>
+        <form onSubmit={onSubmit} >
           <input
             type="text"
             name="Recipe"
