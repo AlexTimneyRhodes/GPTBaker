@@ -11,7 +11,7 @@ export default function Home() {
 
   async function onSubmit(event) {
     event.preventDefault();
-    setResult(<img src = "/loading.gif"/>);
+    setResult(<img src = "https://raw.githubusercontent.com/AlexTimneyRhodes/GPTBakes/main/pages/loading.gif"/>);
     const response = await fetch("/api/generate", {
       method: "POST",
       headers: {
