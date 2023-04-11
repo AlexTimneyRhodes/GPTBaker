@@ -41,7 +41,7 @@ export default function Home() {
         <title>GPT Recipe Generator</title>
         <link rel="icon" href="/icon.png" />
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5347384724265672"
-          crossorigin="anonymous"></script>
+     crossorigin="anonymous"></script>
       </Head>
       <main className={styles.main}>
         <div className={styles.content}>
