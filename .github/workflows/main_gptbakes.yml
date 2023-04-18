@@ -52,5 +52,5 @@ jobs:
         with:
           app-name: 'GPTBakes'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A1A47B9C55BD48AEA4A280B10253263F }}
+          publish-profile: ${{ secrets.AZURE_CREDENTIALS }}
           package: .
