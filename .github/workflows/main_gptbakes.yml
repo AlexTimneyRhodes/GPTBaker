@@ -50,7 +50,7 @@ jobs:
         uses: azure/webapps-deploy@v2
         id: deploy-to-webapp
         with:
-          app-name: 'GPTBakes'
+          app-name: 'GPTRecipeGen'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZURE_CREDENTIALS }}
           package: .
