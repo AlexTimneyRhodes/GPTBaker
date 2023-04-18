@@ -14,7 +14,7 @@ export default async function (req, res) {
     prompt: generateRecipe(req.body.recipe),
     temperature: 0.7,
     stream: false,
-    max_tokens: 512,
+    max_tokens: 1024,
   });
 
   let output;
