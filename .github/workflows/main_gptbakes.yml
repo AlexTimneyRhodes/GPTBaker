@@ -45,7 +45,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: node-app
-
+#publish profile is expected to be in XML format and not json for this usecase
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v2
         id: deploy-to-webapp
