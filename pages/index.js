@@ -3,13 +3,13 @@ import { useState } from "react";
 import styles from "./index.module.css";
 import { useRef } from "react";
 import html2canvas from 'html2canvas';
-import { jsPDF } from "jspdf";
 
 
 
 export default function Home() {
   const aboutRef = useRef();
   const [Input, setInput] = useState("");
+  const [recipeTitle, setTitle] = useState();
   const [result, setResult] = useState();
   const [backgroundImage, setBackgroundImage] = useState();
   const [showShareButton, setShowShareButton] = useState(false);
@@ -36,63 +36,102 @@ export default function Home() {
     });
     const data = await response.json();
     setResult(data.result.text);
+    setTitle(data.result.firstLine);
     setBackgroundImage(data.result.imageUrl);
     setInput("");
     setShowShareButton(true);
   }
 
 
-  //share function. should work on both mobile and desktop. on mobile this should create an image of the recipe and use the share prompt to share it through various apps. on desktop(or browsers that do not support sharing) it should instead print the page to pdf, with images.
   async function shareRecipe() {
-    console.log('shareRecipe function called');
+    console.log("shareRecipe function called");
     const recipeElement = document.querySelector(`.${styles.resultWrapper}`);
-    const recipeImageElement = document.querySelector(`.${styles.recipeImage}`);
-    
+  
     // Create a canvas with the same dimensions as the recipe element
     const canvas = document.createElement("canvas");
     canvas.width = recipeElement.clientWidth;
-    canvas.height = recipeElement.clientHeight + recipeImageElement.clientHeight;
+    canvas.height = recipeElement.clientHeight;
     const ctx = canvas.getContext("2d");
   
-    // Draw the recipe text and image on the canvas
-    const recipeCanvas = await html2canvas(recipeElement, { backgroundColor: null });
-    const recipeImageCanvas = await html2canvas(recipeImageElement, { backgroundColor: null });
-    ctx.drawImage(recipeCanvas, 0, 0);
-    ctx.drawImage(recipeImageCanvas, 0, recipeElement.clientHeight);
+    // Draw the recipe image on the canvas
+    const recipeImage = new Image();
+    recipeImage.src = `/api/proxy?url=${encodeURIComponent(backgroundImage)}`;
+    await new Promise((resolve) => {
+      recipeImage.onload = () => {
+        const imgAspectRatio = recipeImage.width / recipeImage.height;
+        const canvasAspectRatio = canvas.width / canvas.height;
   
-    if (navigator.share) {
-      console.log('navigator.share supported');
-      canvas.toBlob(async (blob) => {
-        const imageFile = new File([blob], "recipe-image.png", { type: "image/png" });
-  
-        try {
-          await navigator.share({
-            title: 'GPT Recipe Generator',
-            text: `Check out this recipe I generated with GPT Recipe Generator:`,
-            files: [imageFile],
-            url: window.location.href,
-          });
-          console.log('Recipe shared successfully');
-        } catch (error) {
-          console.error('Error sharing recipe:', error);
+        let drawWidth, drawHeight, drawX, drawY;
+        
+        //crop the image so it doesnt get stretched/squashed
+        if (imgAspectRatio > canvasAspectRatio) {
+          drawHeight = canvas.height;
+          drawWidth = drawHeight * imgAspectRatio;
+          drawX = (canvas.width - drawWidth) / 2;
+          drawY = 0;
+        } else {
+          drawWidth = canvas.width;
+          drawHeight = drawWidth / imgAspectRatio;
+          drawX = 0;
+          drawY = (canvas.height - drawHeight) / 2;
         }
-      });
-    } else {
-      try {
-        const dataUrl = canvas.toDataURL();
   
-        const pdf = new jsPDF("p", "mm", "a4");
-        const imgProps = pdf.getImageProperties(dataUrl);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-        pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
+        ctx.drawImage(recipeImage, drawX, drawY, drawWidth, drawHeight);
+        resolve();
+      };
+    });
   
-        pdf.save("recipe.pdf");
-      } catch (error) {
-        console.error("Failed to generate PDF", error);
-      }
-    }
+// Draw the semi-transparent white rectangle with rounded edges and a margin
+  const margin = 0.1;
+  const rectX = canvas.width * margin;
+  const rectY = canvas.height * margin;
+  const rectWidth = canvas.width * (1 - 2 * margin);
+  const rectHeight = canvas.height * (1 - 2 * margin);
+  const cornerRadius = 10;
+  
+  ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+  ctx.beginPath();
+  ctx.moveTo(rectX + cornerRadius, rectY);
+  ctx.lineTo(rectX + rectWidth - cornerRadius, rectY);
+  ctx.quadraticCurveTo(rectX + rectWidth, rectY, rectX + rectWidth, rectY + cornerRadius);
+  ctx.lineTo(rectX + rectWidth, rectY + rectHeight - cornerRadius);
+  ctx.quadraticCurveTo(rectX + rectWidth, rectY + rectHeight, rectX + rectWidth - cornerRadius, rectY + rectHeight);
+  ctx.lineTo(rectX + cornerRadius, rectY + rectHeight);
+  ctx.quadraticCurveTo(rectX, rectY + rectHeight, rectX, rectY + rectHeight - cornerRadius);
+  ctx.lineTo(rectX, rectY + cornerRadius);
+  ctx.quadraticCurveTo(rectX, rectY, rectX + cornerRadius, rectY);
+  ctx.closePath();
+  ctx.fill();
+
+    const recipeMargin = 0.15;
+    // Draw the recipe text on the canvas
+    const recipeCanvas = await html2canvas(recipeElement, {
+      backgroundColor: null,
+    });
+    ctx.globalCompositeOperation = "source-over"; // Ensures that the recipe text overlays the image
+    ctx.drawImage(
+      recipeCanvas,
+      canvas.width * recipeMargin,
+      canvas.height * recipeMargin,
+      canvas.width * (1 - 2 * recipeMargin),
+      canvas.height * (1 - 2 * recipeMargin)
+    );
+  
+    // Create a download link for the image
+    const dataUrl = canvas.toDataURL("image/png");
+    const downloadLink = document.createElement("a");
+    downloadLink.href = dataUrl;
+    downloadLink.download = "recipe-image.png";
+  
+    // Trigger the download
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
   }
+  
+  
+
+  
   
   
   
@@ -127,7 +166,7 @@ export default function Home() {
             <button type="submit" className={styles.submitButton}>Generate Recipe</button>
           </form>
           <div className={styles.resultWrapper}>
-            <div className={styles.result}>{result}</div>
+            <div className={styles.result}><span className={styles.recipeTitle}>{recipeTitle}</span>{result}</div>
             {backgroundImage && (
               <img className={styles.recipeImage} src={backgroundImage} alt="Generated recipe image" />
             )}

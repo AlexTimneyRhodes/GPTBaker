@@ -1,4 +1,3 @@
-
 import { Configuration, OpenAIApi } from "openai";
 import generateImage from "./generate_image";
 import fs from "fs";
@@ -23,9 +22,11 @@ export default async function (req, res) {
   } else {
     output = req.body.recipe + completion.data.choices[0].text;
   }
+// Get the first line of the text output
+const lines = output.split('\n');
+const firstLine = lines.find(line => line.trim() !== ''); // get the first non-empty line
+const remainingLines = lines.filter(line => line !== firstLine).join('\n'); // filter out the first line and join the remaining lines
 
-  // Get the first line of the text output
-  const firstLine = output.split('\n').find(line => line.trim() !== '');
 
   // Log the firstLine to log.txt
   fs.appendFile("log.txt", firstLine + "\n", (err) => {
@@ -37,7 +38,7 @@ export default async function (req, res) {
   const imageUrl = await generateImage(firstLine);
 
   // Combine the image URL with the text output
-  const result = { text: output, imageUrl: imageUrl };
+  const result = { firstLine: firstLine,text:remainingLines, imageUrl: imageUrl };
 
   res.status(200).json({ result: result });
 }
