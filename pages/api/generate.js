@@ -10,7 +10,7 @@ const openai = new OpenAIApi(configuration);
 
 export default async function (req, res) {
   const completion = await openai.createCompletion({
-    model: "text-davinci-002",
+    model: "davinci-002",
     prompt: generateRecipe(req.body.recipe),
     temperature: 0.7,
     stream: false,
